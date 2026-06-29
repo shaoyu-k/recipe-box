@@ -5,6 +5,36 @@ import type { Category } from "@/lib/types";
 
 const SEED: RecipeWriteInput[] = [
   {
+    title: "Singapore Hotplate Egg Tofu",
+    category: "Chinese" as Category,
+    type: "link",
+    ingredients:
+      "EGG TOFU:\n1 tube egg tofu (160g), cut into discs\nOil for deep frying\n\nGRAVY:\n1 onion or shallot, sliced\n1 tsp garlic, minced\n1 tsp ginger, minced\n100 g beef mince\n5 prawns, peeled\n2 tbsp oyster sauce\n1 tbsp light soy sauce\n1 tsp dark soy sauce\n1 cup chicken stock (or water)\n5 baby corn\n½ carrot, sliced\nHandful baby bok choy\nCornstarch slurry (1 tbsp cornstarch + 3-4 tbsp water)\n1 tsp sesame oil\n¼ tsp ground white pepper\n\nHOTPLATE:\n2 eggs, beaten",
+    instructions:
+      "1. Cut egg tofu tube in middle, gently squeeze out. Slice into discs. Pat dry.\n2. Deep fry in medium oil until golden brown. Drain on paper towels.\n3. Sauté onion, garlic, ginger in oil until fragrant.\n4. Add beef mince, cook ~80% done. Add prawns, cook until pink.\n5. Season with oyster sauce, light soy, dark soy.\n6. Add chicken stock. Add hard veggies (baby corn, carrots). Bring to boil.\n7. Add leafy greens. Thicken with cornstarch slurry.\n8. Finish with sesame oil and white pepper.\n9. Heat hotplate/cast iron. Add oil, pour beaten eggs, swirl.\n10. When eggs are just setting, top with fried tofu, pour gravy over.\n11. Serve immediately while sizzling with rice.",
+    notes: "Nomadette Eats recipe. Classic Singapore zi char dish. No hotplate? Use regular pan — tastes the same! Deep frying tofu = no flipping needed.",
+    photoUrl: null,
+    sourceUrl: "https://youtu.be/xj8ibrGZmSw",
+    sourceImage: null,
+    tried: false,
+    favorite: false,
+  },
+  {
+    title: "Singapore Chicken Laksa",
+    category: "Other" as Category,
+    type: "link",
+    ingredients:
+      "CHICKEN STOCK:\n500 g chicken carcass/spare parts\n1 whole onion\n2-3 garlic cloves\n2 litres water\n300 g chicken meat (for topping)\n\nLAKSA PASTE:\n100 ml dried chilli paste (or 10 dried chillies, soaked)\n5 red chillies\n1 medium onion (or 2-3 shallots)\n2-3 garlic cloves\n4 candlenuts\n20 g ginger\n20 g galangal\n20 g fresh turmeric (or 1 tsp turmeric powder)\n2 lemongrass stalks (inner white core)\n20 g belachan (optional)\n30 g dried shrimps, soaked (optional)\n1 tbsp coriander seeds\n\nLAKSA GRAVY:\nLaksa paste (from above)\n1.5-2 litres chicken broth\n400 ml coconut cream\n1 tbsp salt\n1 tbsp brown sugar\n1 pack fried tofu puffs (taopok)\n\nNOODLE ASSEMBLY:\n4 servings laksa noodles\n300 g cooked chicken, shredded\nBlanched bok choy\nBoiled eggs\nSpicy sambal (optional)",
+    instructions:
+      "1. Sear chicken carcass and meat in oil until surface cooked. Add onion, garlic, 2L water. Boil then simmer.\n2. After 20 min, remove chicken meat. Check cooked, shred for topping.\n3. Continue simmering stock at least 1 hour, then strain.\n4. Blend all paste ingredients until smooth.\n5. Heat oil in pot. Fry laksa paste over LOW heat until fragrant and darkened (pecah minyak).\n6. Add coconut cream, stir, bring to a boil.\n7. Add chicken stock, season with salt and sugar. Add tofu puffs.\n8. Cook noodles per packet. Assemble in bowls: noodles, shredded chicken, eggs, veg, gravy.\n9. Serve with sambal on the side.",
+    notes: "Nomadette recipe by Sha. Singapore-style. Serves 4. Key: sear chicken first to avoid gamey stock. Fry paste on low until dark and oil separates.",
+    photoUrl: null,
+    sourceUrl: "https://nomadette.com/chicken-laksa/",
+    sourceImage: null,
+    tried: false,
+    favorite: false,
+  },
+  {
     title: "Supreme Soy Sauce Noodles 豉油皇炒面",
     category: "Chinese" as Category,
     type: "link",
