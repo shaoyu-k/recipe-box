@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #eceedf;
+  --paper-dark: #e2e5d2;
+  --card: #fbf8ef;
+  --ink: #2b2a24;
+  --ink-soft: #5b5a4e;
+  --tomato: #c1442c;
+  --tomato-dark: #a13a25;
+  --mustard: #d9a441;
+  --clay: #a8714a;
+  --denim: #44607a;
+  --forest: #46604f;
+  --plum: #8c3a4b;
+  --sage: #7c8a6b;
+  --line: #d8d6c3;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-dark: var(--paper-dark);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-tomato: var(--tomato);
+  --color-tomato-dark: var(--tomato-dark);
+  --color-mustard: var(--mustard);
+  --color-clay: var(--clay);
+  --color-denim: var(--denim);
+  --color-forest: var(--forest);
+  --color-plum: var(--plum);
+  --color-sage: var(--sage);
+  --color-line: var(--line);
+
+  --font-display: var(--font-instrument-serif);
+  --font-body: var(--font-inter);
+  --font-mono: var(--font-space-mono);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  background: var(--paper);
+}
+
+body {
+  background: var(--paper);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(43,42,36,0.06) 1px, transparent 0);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--tomato);
+  color: var(--card);
+}
+
+/* Card entrance animation - cards settling into the box */
+@keyframes settle-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) rotate(var(--settle-rot, 0deg)) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--card-rot, 0deg)) scale(1);
+  }
+}
+
+.card-settle {
+  animation: settle-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-settle {
+    animation: none;
+    transform: rotate(var(--card-rot, 0deg));
+  }
+}
+
+input,
+textarea,
+select {
+  font-family: var(--font-body);
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--tomato);
+  outline-offset: 2px;
+}
+
+textarea {
+  field-sizing: content;
+}
