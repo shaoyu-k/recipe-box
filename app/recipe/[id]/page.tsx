@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getRecipe, deleteRecipe, updateRecipe } from "@/lib/api-client";
 import { Recipe, CATEGORY_COLOR } from "@/lib/types";
+import { useTranslation } from "@/lib/i18n";
 
 function StarIcon({ filled, className }: { filled: boolean; className?: string }) {
   return (
@@ -27,6 +28,7 @@ function StarIcon({ filled, className }: { filled: boolean; className?: string }
 export default function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { t, locale } = useTranslation();
   const [recipe, setRecipe] = useState<Recipe | null | undefined>(undefined);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
@@ -60,7 +62,7 @@ export default function RecipeDetailPage() {
   if (recipe === undefined) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-16 text-center font-mono text-sm text-ink-soft">
-        Opening the card…
+        {t("detail.loading")}
       </main>
     );
   }
@@ -68,9 +70,9 @@ export default function RecipeDetailPage() {
   if (recipe === null) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <p className="mb-4 text-ink-soft">That recipe isn&apos;t in the box.</p>
+        <p className="mb-4 text-ink-soft">{t("detail.notFound")}</p>
         <Link href="/" className="text-tomato underline">
-          Back to the box
+          {t("detail.notFoundBack")}
         </Link>
       </main>
     );
@@ -86,7 +88,7 @@ export default function RecipeDetailPage() {
         href="/"
         className="mb-4 inline-flex items-center gap-1 font-mono text-xs uppercase tracking-wide text-ink-soft hover:text-ink"
       >
-        ← Back to the box
+        {t("detail.back")}
       </Link>
 
       <div className="overflow-hidden rounded-sm border border-line bg-card">
@@ -123,7 +125,9 @@ export default function RecipeDetailPage() {
 
           {recipe.type !== "photo" && (
             <div className="absolute right-3 top-3 flex items-center gap-1 rounded-sm bg-tomato px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-card">
-              {recipe.type === "youtube" ? "Pinned from YouTube" : "Pinned from the web"}
+              {recipe.type === "youtube"
+                ? t("detail.pinnedYouTube")
+                : t("detail.pinnedWeb")}
             </div>
           )}
         </div>
@@ -131,13 +135,13 @@ export default function RecipeDetailPage() {
         <div className="px-5 py-5 sm:px-7 sm:py-6">
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-mono text-xs tracking-wider text-ink-soft">
-              No. {String(recipe.catalogNumber).padStart(3, "0")}
+              {t("detail.catalogNo", { n: String(recipe.catalogNumber).padStart(3, "0") })}
             </p>
             <span
               className="rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-card"
               style={{ background: CATEGORY_COLOR[recipe.category] }}
             >
-              {recipe.category}
+              {t(`cat.${recipe.category}`)}
             </span>
             <button
               onClick={() => toggleField("tried")}
@@ -147,7 +151,7 @@ export default function RecipeDetailPage() {
                   : "border-line bg-paper-dark text-ink-soft hover:border-ink/40"
               }`}
             >
-              {recipe.tried ? "Tried it" : "Wishlist"}
+              {recipe.tried ? t("detail.tried") : t("detail.wishlist")}
             </button>
             <button
               onClick={() => toggleField("favorite")}
@@ -174,14 +178,16 @@ export default function RecipeDetailPage() {
               rel="noopener noreferrer"
               className="mt-2 inline-block text-sm text-denim underline"
             >
-              {recipe.type === "youtube" ? "Watch on YouTube" : "View original recipe"}
+              {recipe.type === "youtube"
+                ? t("detail.watchYouTube")
+                : t("detail.viewOriginal")}
             </a>
           )}
 
           {ingredientLines.length > 0 && (
             <section className="mt-6">
               <h2 className="font-mono text-[11px] uppercase tracking-wide text-ink-soft">
-                Ingredients
+                {t("detail.ingredients")}
               </h2>
               <ul className="mt-2 space-y-1.5 font-mono text-sm leading-relaxed text-ink">
                 {ingredientLines.map((line, i) => (
@@ -197,7 +203,7 @@ export default function RecipeDetailPage() {
           {instructionLines.length > 0 && (
             <section className="mt-6">
               <h2 className="font-mono text-[11px] uppercase tracking-wide text-ink-soft">
-                Instructions
+                {t("detail.instructions")}
               </h2>
               <ol className="mt-2 space-y-3 text-sm leading-relaxed text-ink">
                 {instructionLines.map((line, i) => (
@@ -215,7 +221,7 @@ export default function RecipeDetailPage() {
           {recipe.notes.trim() && (
             <section className="mt-6 rounded-sm bg-paper-dark/60 p-3">
               <h2 className="font-mono text-[11px] uppercase tracking-wide text-ink-soft">
-                Notes
+                {t("detail.notes")}
               </h2>
               <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-ink">
                 {recipe.notes}
@@ -228,29 +234,29 @@ export default function RecipeDetailPage() {
               href={`/recipe/${recipe.id}/edit`}
               className="rounded-full border border-line px-5 py-2 text-sm font-medium text-ink hover:border-ink/40"
             >
-              Edit
+              {t("detail.edit")}
             </Link>
             {!confirmingDelete ? (
               <button
                 onClick={() => setConfirmingDelete(true)}
                 className="rounded-full border border-line px-5 py-2 text-sm font-medium text-tomato hover:border-tomato"
               >
-                Delete
+                {t("detail.delete")}
               </button>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-ink-soft">Remove this card?</span>
+                <span className="text-sm text-ink-soft">{t("detail.deleteConfirm")}</span>
                 <button
                   onClick={handleDelete}
                   className="rounded-full bg-tomato px-4 py-1.5 text-sm font-medium text-card"
                 >
-                  Yes, delete
+                  {t("detail.deleteYes")}
                 </button>
                 <button
                   onClick={() => setConfirmingDelete(false)}
                   className="text-sm text-ink-soft underline"
                 >
-                  Cancel
+                  {t("detail.cancel")}
                 </button>
               </div>
             )}

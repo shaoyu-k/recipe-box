@@ -6,6 +6,7 @@ import { getAllRecipes, exportAllRecipes } from "@/lib/api-client";
 import { Recipe, Category } from "@/lib/types";
 import { RecipeCard } from "@/components/RecipeCard";
 import { CategoryFilter } from "@/components/CategoryFilter";
+import { useTranslation } from "@/lib/i18n";
 
 function StarIcon({ filled, className }: { filled: boolean; className?: string }) {
   return (
@@ -26,6 +27,7 @@ function StarIcon({ filled, className }: { filled: boolean; className?: string }
 }
 
 export default function Home() {
+  const { t, locale, setLocale } = useTranslation();
   const [recipes, setRecipes] = useState<Recipe[] | null>(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<Category | "All">("All");
@@ -78,27 +80,33 @@ export default function Home() {
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">
-            Shared with everyone who has the code
+            {t("home.sharedTagline")}
           </p>
           <h1 className="-mt-1 font-display text-5xl italic text-ink sm:text-6xl">
-            The Recipe Box
+            {t("home.title")}
           </h1>
         </div>
         <div className="mt-1 flex shrink-0 flex-col items-end gap-1.5">
+          <button
+            onClick={() => setLocale(locale === "en" ? "id" : "en")}
+            className="font-mono text-[11px] uppercase tracking-wide text-ink-soft underline hover:text-ink"
+          >
+            {t("lang.label")}
+          </button>
           {recipes !== null && recipes.length > 0 && (
             <button
               onClick={handleExport}
               disabled={exporting}
               className="font-mono text-[11px] uppercase tracking-wide text-ink-soft underline hover:text-ink disabled:opacity-50"
             >
-              {exporting ? "Exporting…" : "Export backup"}
+              {exporting ? t("home.exporting") : t("home.export")}
             </button>
           )}
           <button
             onClick={handleLock}
             className="font-mono text-[11px] uppercase tracking-wide text-ink-soft underline hover:text-ink"
           >
-            Lock the box
+            {t("home.lock")}
           </button>
         </div>
       </header>
@@ -108,7 +116,7 @@ export default function Home() {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search your recipes…"
+          placeholder={t("home.searchPlaceholder")}
           className="w-full rounded-full border border-line bg-card px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft/70 sm:max-w-xs"
         />
         <CategoryFilter active={category} onChange={setCategory} />
@@ -124,7 +132,7 @@ export default function Home() {
                 status === s ? "bg-ink text-card" : "text-ink-soft hover:text-ink"
               }`}
             >
-              {s}
+              {t(`filter.${s.toLowerCase()}`)}
             </button>
           ))}
         </div>
@@ -139,37 +147,36 @@ export default function Home() {
           }`}
         >
           <StarIcon filled={favoritesOnly} className="h-3.5 w-3.5" />
-          Favorites
+          {t("filter.favorites")}
         </button>
       </div>
 
       {recipes === null && (
         <p className="py-16 text-center font-mono text-sm text-ink-soft">
-          Opening the box…
+          {t("home.loading")}
         </p>
       )}
 
       {recipes !== null && recipes.length === 0 && (
         <div className="flex flex-col items-center gap-4 rounded-sm border border-dashed border-line py-20 text-center">
           <p className="font-display text-2xl italic text-ink">
-            Your box is empty.
+            {t("home.emptyTitle")}
           </p>
           <p className="max-w-xs text-sm text-ink-soft">
-            Add a photo of a dish with the recipe, or pin one from YouTube to
-            get started.
+            {t("home.emptyDesc")}
           </p>
           <Link
             href="/add"
             className="rounded-full bg-tomato px-5 py-2.5 text-sm font-medium text-card hover:bg-tomato-dark"
           >
-            Add your first recipe
+            {t("home.emptyCta")}
           </Link>
         </div>
       )}
 
       {recipes !== null && recipes.length > 0 && filtered.length === 0 && (
         <p className="py-16 text-center text-sm text-ink-soft">
-          Nothing matches that search.
+          {t("home.noMatch")}
         </p>
       )}
 

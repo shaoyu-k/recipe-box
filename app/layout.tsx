@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Inter, Space_Mono } from "next/font/google";
+import { I18nProvider } from "@/lib/i18n";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -42,7 +43,7 @@ export default function RootLayout({
       <body
         className={`${instrumentSerif.variable} ${inter.variable} ${spaceMono.variable} antialiased`}
       >
-        {children}
+        <I18nProvider>{children}</I18nProvider>
       </body>
     </html>
   );

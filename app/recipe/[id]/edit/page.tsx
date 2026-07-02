@@ -6,9 +6,11 @@ import Link from "next/link";
 import { getRecipe } from "@/lib/api-client";
 import { Recipe } from "@/lib/types";
 import { RecipeForm } from "@/components/RecipeForm";
+import { useTranslation } from "@/lib/i18n";
 
 export default function EditRecipePage() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
   const [recipe, setRecipe] = useState<Recipe | null | undefined>(undefined);
 
   useEffect(() => {
@@ -18,7 +20,7 @@ export default function EditRecipePage() {
   if (recipe === undefined) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-16 text-center font-mono text-sm text-ink-soft">
-        Opening the card…
+        {t("edit.loading")}
       </main>
     );
   }
@@ -26,9 +28,9 @@ export default function EditRecipePage() {
   if (recipe === null) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <p className="mb-4 text-ink-soft">That recipe isn&apos;t in the box.</p>
+        <p className="mb-4 text-ink-soft">{t("edit.notFound")}</p>
         <Link href="/" className="text-tomato underline">
-          Back to the box
+          {t("edit.notFoundBack")}
         </Link>
       </main>
     );
@@ -40,10 +42,10 @@ export default function EditRecipePage() {
         href={`/recipe/${id}`}
         className="mb-4 inline-flex items-center gap-1 font-mono text-xs uppercase tracking-wide text-ink-soft hover:text-ink"
       >
-        ← Back to the card
+        {t("edit.back")}
       </Link>
       <h1 className="mb-6 font-display text-4xl italic text-ink">
-        Edit recipe
+        {t("edit.heading")}
       </h1>
       <RecipeForm existing={recipe} />
     </main>

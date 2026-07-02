@@ -6,11 +6,13 @@ import { CATEGORIES, CATEGORY_COLOR, Category, Recipe } from "@/lib/types";
 import { createRecipe, updateRecipe, uploadPhoto } from "@/lib/api-client";
 import { fetchLinkPreview } from "@/lib/link-preview";
 import { useObjectURL } from "@/lib/useObjectURL";
+import { useTranslation } from "@/lib/i18n";
 
 type Mode = "photo" | "pin";
 
 export function RecipeForm({ existing }: { existing?: Recipe }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const isEditing = !!existing;
 
   const [mode, setMode] = useState<Mode>(
@@ -24,14 +26,11 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
   const [instructions, setInstructions] = useState(existing?.instructions ?? "");
   const [notes, setNotes] = useState(existing?.notes ?? "");
 
-  // photoFile holds a newly picked photo not yet uploaded; photoUrl holds
-  // either the existing photo (when editing) or the result of an upload.
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(existing?.photoUrl ?? null);
   const localPreview = useObjectURL(photoFile);
   const photoPreview = localPreview ?? photoUrl;
 
-  // Pinned-link state: works for a YouTube video or any other recipe URL.
   const [linkUrl, setLinkUrl] = useState(existing?.sourceUrl ?? "");
   const [sourceImage, setSourceImage] = useState<string | null>(existing?.sourceImage ?? null);
   const [isYouTube, setIsYouTube] = useState<boolean>(existing?.type === "youtube");
@@ -42,9 +41,6 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-fetch a preview shortly after the user pastes a link. For YouTube
-  // this is title + thumbnail; for other recipe sites, it also tries to
-  // pull real ingredients/instructions if the page provides them.
   useEffect(() => {
     if (mode !== "pin" || !linkUrl.trim()) return;
     if (linkUrl === existing?.sourceUrl) return;
@@ -55,7 +51,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
       const preview = await fetchLinkPreview(linkUrl.trim());
       setFetchingPreview(false);
       if (!preview) {
-        setFetchError("Couldn't read that link. Check the URL and try again.");
+        setFetchError(t("form.linkError"));
         return;
       }
       setIsYouTube(preview.isYouTube);
@@ -79,15 +75,15 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
     setError(null);
 
     if (!title.trim()) {
-      setError("Give the recipe a title.");
+      setError(t("form.errorTitle"));
       return;
     }
     if (mode === "photo" && !photoFile && !photoUrl) {
-      setError("Add a photo of the dish, or switch to pinning a link.");
+      setError(t("form.errorPhoto"));
       return;
     }
     if (mode === "pin" && !linkUrl.trim()) {
-      setError("Paste a recipe link or YouTube URL.");
+      setError(t("form.errorLink"));
       return;
     }
 
@@ -99,7 +95,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
         setPhotoUrl(finalPhotoUrl);
       } catch {
         setUploading(false);
-        setError("Couldn't upload that photo. Check your connection and try again.");
+        setError(t("form.errorUpload"));
         return;
       }
       setUploading(false);
@@ -125,7 +121,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
         : await createRecipe(input);
       router.push(`/recipe/${saved.id}`);
     } catch {
-      setError("Couldn't save that. Check your connection and try again.");
+      setError(t("form.errorSave"));
       setSaving(false);
     }
   }
@@ -137,15 +133,15 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
       {/* Mode toggle */}
       <div className="flex gap-2 rounded-full border border-line bg-card p-1">
         <ToggleButton active={mode === "photo"} onClick={() => setMode("photo")}>
-          Photo recipe
+          {t("form.photoTab")}
         </ToggleButton>
         <ToggleButton active={mode === "pin"} onClick={() => setMode("pin")}>
-          Pin from a link
+          {t("form.pinTab")}
         </ToggleButton>
       </div>
 
       {mode === "photo" ? (
-        <Field label="Photo of the dish">
+        <Field label={t("form.photoLabel")}>
           <label className="flex aspect-[4/3] w-full max-w-sm cursor-pointer items-center justify-center overflow-hidden rounded-sm border border-dashed border-line bg-paper-dark text-sm text-ink-soft hover:border-ink/40">
             {photoPreview ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -155,7 +151,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <span>Tap to choose a photo</span>
+              <span>{t("form.photoPlaceholder")}</span>
             )}
             <input
               type="file"
@@ -167,17 +163,17 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
           </label>
         </Field>
       ) : (
-        <Field label="Link">
+        <Field label={t("form.linkLabel")}>
           <input
             type="url"
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
-            placeholder="Paste a recipe link or YouTube URL"
+            placeholder={t("form.linkPlaceholder")}
             className="w-full rounded-sm border border-line bg-card px-3 py-2.5 text-sm text-ink placeholder:text-ink-soft/70"
           />
           {fetchingPreview && (
             <p className="mt-2 font-mono text-xs text-ink-soft">
-              Fetching title, photo, and recipe details…
+              {t("form.fetching")}
             </p>
           )}
           {fetchError && (
@@ -196,17 +192,17 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
         </Field>
       )}
 
-      <Field label="Title">
+      <Field label={t("form.titleLabel")}>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Grandma's laksa"
+          placeholder={t("form.titlePlaceholder")}
           className="w-full rounded-sm border border-line bg-card px-3 py-2.5 text-sm text-ink placeholder:text-ink-soft/70"
         />
       </Field>
 
-      <Field label="Category">
+      <Field label={t("form.categoryLabel")}>
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
             <button
@@ -223,20 +219,20 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
                 className="h-2 w-2 rounded-full"
                 style={{ background: category === c ? "currentColor" : CATEGORY_COLOR[c] }}
               />
-              {c}
+              {t(`cat.${c}`)}
             </button>
           ))}
         </div>
       </Field>
 
-      <Field label="Have you made it?">
+      <Field label={t("form.triedLabel")}>
         <div className="flex items-center gap-3">
           <div className="flex gap-2 rounded-full border border-line bg-card p-1">
             <ToggleButton active={!tried} onClick={() => setTried(false)}>
-              On my wishlist
+              {t("form.triedWishlist")}
             </ToggleButton>
             <ToggleButton active={tried} onClick={() => setTried(true)}>
-              Tried it
+              {t("form.triedYes")}
             </ToggleButton>
           </div>
           <button
@@ -255,31 +251,31 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
         </div>
       </Field>
 
-      <Field label="Ingredients">
+      <Field label={t("form.ingredientsLabel")}>
         <textarea
           value={ingredients}
           onChange={(e) => setIngredients(e.target.value)}
-          placeholder={"One per line, e.g.\n2 cups flour\n1 tsp salt"}
+          placeholder={t("form.ingredientsPlaceholder")}
           rows={5}
           className="w-full resize-none rounded-sm border border-line bg-card px-3 py-2.5 font-mono text-sm leading-relaxed text-ink placeholder:text-ink-soft/70"
         />
       </Field>
 
-      <Field label="Instructions">
+      <Field label={t("form.instructionsLabel")}>
         <textarea
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}
-          placeholder={"One step per line"}
+          placeholder={t("form.instructionsPlaceholder")}
           rows={6}
           className="w-full resize-none rounded-sm border border-line bg-card px-3 py-2.5 text-sm leading-relaxed text-ink placeholder:text-ink-soft/70"
         />
       </Field>
 
-      <Field label="Notes (optional)">
+      <Field label={t("form.notesLabel")}>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Substitutions, who loved it, what to change next time…"
+          placeholder={t("form.notesPlaceholder")}
           rows={3}
           className="w-full resize-none rounded-sm border border-line bg-card px-3 py-2.5 text-sm leading-relaxed text-ink placeholder:text-ink-soft/70"
         />
@@ -294,19 +290,19 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
           className="rounded-full bg-tomato px-6 py-2.5 text-sm font-medium text-card hover:bg-tomato-dark disabled:opacity-60"
         >
           {uploading
-            ? "Uploading photo…"
+            ? t("form.uploading")
             : saving
-              ? "Saving…"
+              ? t("form.saving")
               : isEditing
-                ? "Save changes"
-                : "Add to box"}
+                ? t("form.saveEdit")
+                : t("form.saveAdd")}
         </button>
         <button
           type="button"
           onClick={() => router.back()}
           className="rounded-full border border-line px-6 py-2.5 text-sm font-medium text-ink-soft hover:border-ink/40"
         >
-          Cancel
+          {t("form.cancel")}
         </button>
       </div>
     </form>

@@ -1,6 +1,7 @@
 "use client";
 
 import { CATEGORIES, CATEGORY_COLOR, Category } from "@/lib/types";
+import { useTranslation } from "@/lib/i18n";
 
 export function CategoryFilter({
   active,
@@ -9,6 +10,7 @@ export function CategoryFilter({
   active: Category | "All";
   onChange: (c: Category | "All") => void;
 }) {
+  const { t } = useTranslation();
   const items: (Category | "All")[] = ["All", ...CATEGORIES];
 
   return (
@@ -30,7 +32,7 @@ export function CategoryFilter({
               className="h-2 w-2 rounded-full"
               style={{ background: isActive ? "currentColor" : color }}
             />
-            {item}
+            {item === "All" ? t("filter.all") : t(`cat.${item}`)}
           </button>
         );
       })}

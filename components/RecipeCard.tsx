@@ -2,17 +2,16 @@
 
 import Link from "next/link";
 import { Recipe, CATEGORY_COLOR } from "@/lib/types";
+import { useTranslation } from "@/lib/i18n";
 
-// A small deterministic "randomness" so each card gets a slight, consistent
-// tilt — like it was dropped into the box by hand — without re-rolling on
-// every render.
 function tiltFor(seed: string): number {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  return (h % 5) - 2; // -2deg .. 2deg
+  return (h % 5) - 2;
 }
 
 export function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
+  const { t } = useTranslation();
   const rot = tiltFor(recipe.id);
   const image = recipe.type === "photo" ? recipe.photoUrl : recipe.sourceImage;
 
@@ -31,7 +30,6 @@ export function RecipeCard({ recipe, index }: { recipe: Recipe; index: number })
         className="relative rounded-sm bg-card shadow-[0_1px_2px_rgba(43,42,36,0.15)] transition-all duration-200 group-hover:-translate-y-1 group-hover:rotate-0 group-hover:shadow-[0_10px_20px_rgba(43,42,36,0.18)]"
         style={{ transform: `rotate(${rot}deg)` }}
       >
-        {/* category tab */}
         <div
           className="absolute -top-2 left-4 h-4 w-10 rounded-t-sm"
           style={{ background: CATEGORY_COLOR[recipe.category] }}
@@ -68,18 +66,18 @@ export function RecipeCard({ recipe, index }: { recipe: Recipe; index: number })
 
         <div className="border-t border-line/70 px-3 py-2.5">
           <p className="font-mono text-[10px] tracking-wider text-ink-soft">
-            No. {String(recipe.catalogNumber).padStart(3, "0")}
+            {t("detail.catalogNo", { n: String(recipe.catalogNumber).padStart(3, "0") })}
           </p>
           <h3 className="mt-0.5 truncate font-display text-xl leading-tight text-ink">
             {recipe.title || "Untitled recipe"}
           </h3>
           <div className="mt-0.5 flex items-center gap-1.5">
             <p className="text-[11px] uppercase tracking-wide text-ink-soft">
-              {recipe.category}
+              {t(`cat.${recipe.category}`)}
             </p>
             {!recipe.tried && (
               <span className="rounded-full bg-paper-dark px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-ink-soft">
-                Wishlist
+                {t("filter.wishlist")}
               </span>
             )}
           </div>
