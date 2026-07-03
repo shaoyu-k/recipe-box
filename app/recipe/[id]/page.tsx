@@ -78,7 +78,7 @@ export default function RecipeDetailPage() {
     );
   }
 
-  const image = recipe.type === "photo" ? recipe.photoUrl : recipe.sourceImage;
+  const image = recipe.photoUrl || recipe.sourceImage;
   const ingredientLines = recipe.ingredients.split("\n").filter((l) => l.trim());
   const instructionLines = recipe.instructions.split("\n").filter((l) => l.trim());
 

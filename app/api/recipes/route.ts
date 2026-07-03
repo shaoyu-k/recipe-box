@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { listRecipes, insertRecipe } from "@/lib/sql";
+import { put } from "@vercel/blob";
+import { listRecipes, insertRecipe, updateRecipeById } from "@/lib/sql";
 
 export async function GET() {
   try {
@@ -14,6 +15,22 @@ export async function GET() {
   }
 }
 
+async function mirrorImage(sourceImage: string, recipeId: string): Promise<string | null> {
+  try {
+    const res = await fetch(sourceImage, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (buffer.length > 10 * 1024 * 1024) return null; // skip if >10MB
+    const blob = await put(`recipes/${recipeId}`, buffer, {
+      access: "public",
+      contentType: res.headers.get("content-type") || "image/jpeg",
+    });
+    return blob.url;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -23,6 +40,15 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    let photoUrl = body.photoUrl ?? null;
+
+    // For pinned links / YouTube: download the external image and self-host
+    // it on Vercel Blob so it doesn't break when the source site changes.
+    if (!photoUrl && body.sourceImage && (body.type === "youtube" || body.type === "link")) {
+      photoUrl = await mirrorImage(body.sourceImage, crypto.randomUUID());
+    }
+
     const recipe = await insertRecipe({
       title: body.title,
       category: body.category,
@@ -30,7 +56,7 @@ export async function POST(request: Request) {
       ingredients: body.ingredients ?? "",
       instructions: body.instructions ?? "",
       notes: body.notes ?? "",
-      photoUrl: body.photoUrl ?? null,
+      photoUrl,
       sourceUrl: body.sourceUrl ?? null,
       sourceImage: body.sourceImage ?? null,
       tried: body.tried ?? false,

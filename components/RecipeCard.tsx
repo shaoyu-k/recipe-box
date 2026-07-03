@@ -13,7 +13,7 @@ function tiltFor(seed: string): number {
 export function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
   const { t } = useTranslation();
   const rot = tiltFor(recipe.id);
-  const image = recipe.type === "photo" ? recipe.photoUrl : recipe.sourceImage;
+  const image = recipe.photoUrl || recipe.sourceImage;
 
   return (
     <Link
