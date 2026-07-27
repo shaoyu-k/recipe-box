@@ -156,7 +156,6 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
             <input
               type="file"
               accept="image/*"
-              capture="environment"
               onChange={handlePhotoChange}
               className="hidden"
             />
