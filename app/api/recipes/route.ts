@@ -50,6 +50,7 @@ export async function POST(request: Request) {
     }
 
     const recipe = await insertRecipe({
+      catalogNumber: body.catalogNumber,
       title: body.title,
       category: body.category,
       type: body.type,

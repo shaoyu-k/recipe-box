@@ -63,7 +63,7 @@ async function ensureSchema(): Promise<void> {
   await sql`
     CREATE TABLE IF NOT EXISTS recipes (
       id TEXT PRIMARY KEY,
-      catalog_number SERIAL,
+      catalog_number INTEGER NOT NULL DEFAULT 0,
       title TEXT NOT NULL,
       category TEXT NOT NULL,
       type TEXT NOT NULL,
@@ -111,6 +111,7 @@ export async function getRecipeById(id: string): Promise<Recipe | null> {
 }
 
 export interface RecipeWriteInput {
+  catalogNumber?: number;
   title: string;
   category: Category;
   type: Recipe["type"];
@@ -129,10 +130,10 @@ export async function insertRecipe(input: RecipeWriteInput): Promise<Recipe> {
   const id = crypto.randomUUID();
   const rows = (await sql`
     INSERT INTO recipes
-      (id, title, category, type, ingredients, instructions, notes,
+      (id, catalog_number, title, category, type, ingredients, instructions, notes,
        photo_url, source_url, source_image, tried, favorite)
     VALUES
-      (${id}, ${input.title}, ${input.category}, ${input.type},
+      (${id}, ${input.catalogNumber ?? 0}, ${input.title}, ${input.category}, ${input.type},
        ${input.ingredients}, ${input.instructions}, ${input.notes},
        ${input.photoUrl}, ${input.sourceUrl}, ${input.sourceImage},
        ${input.tried}, ${input.favorite})
@@ -148,6 +149,7 @@ export async function updateRecipeById(
   await ensureSchema();
   const rows = (await sql`
     UPDATE recipes SET
+      catalog_number = ${input.catalogNumber ?? 0},
       title = ${input.title},
       category = ${input.category},
       type = ${input.type},
