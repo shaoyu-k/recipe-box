@@ -57,8 +57,9 @@ function ListIcon({ className }: { className?: string }) {
 type SortMode = "latest" | "oldest" | "az";
 
 export default function Home() {
-  const { t } = useTranslation();
+  const { t, locale, setLocale } = useTranslation();
   const [recipes, setRecipes] = useState<Recipe[] | null>(null);
+  const [owner, setOwner] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<Category | "All">("All");
   const [status, setStatus] = useState<"All" | "Tried" | "Wishlist">("All");
@@ -69,6 +70,7 @@ export default function Home() {
 
   useEffect(() => {
     getAllRecipes().then(setRecipes).catch(() => setRecipes([]));
+    setOwner(localStorage.getItem("recipebox_owner"));
   }, []);
 
   async function handleLock() {
@@ -121,6 +123,11 @@ export default function Home() {
             <span className="font-display text-lg text-ink">{t("home.title")}</span>
           </div>
           <div className="flex items-center gap-4 font-mono text-[11px] uppercase tracking-wide text-ink-soft">
+            {owner === "SY" && (
+              <button onClick={() => setLocale(locale === "en" ? "id" : "en")} className="hover:text-ink">
+                {t("lang.label")}
+              </button>
+            )}
             {recipes !== null && recipes.length > 0 && (
               <button onClick={handleExport} disabled={exporting} className="hover:text-ink disabled:opacity-50">
                 {exporting ? t("home.exporting") : t("home.export")}
