@@ -14,22 +14,28 @@ const en: TranslationMap = {
   // Home
   "home.sharedTagline": "Shared with everyone who has the code",
   "home.title": "The Recipe Box",
+  "home.subtitle": "A home for recipes worth making again.",
   "home.export": "Export backup",
   "home.exporting": "Exporting…",
   "home.lock": "Lock the box",
-  "home.searchPlaceholder": "Search your recipes…",
+  "home.searchPlaceholder": "Search your recipes, ingredients or tags…",
   "home.loading": "Opening the box…",
   "home.emptyTitle": "Your box is empty.",
   "home.emptyDesc":
     "Add a photo of a dish with the recipe, or pin one from YouTube to get started.",
   "home.emptyCta": "Add your first recipe",
   "home.noMatch": "Nothing matches that search.",
+  "home.newRecipe": "New Recipe",
+  "home.sortLatest": "Latest added",
+  "home.sortOldest": "Oldest first",
+  "home.sortAZ": "A–Z",
 
   // Filters
   "filter.all": "All",
   "filter.tried": "Tried",
   "filter.wishlist": "Wishlist",
   "filter.favorites": "Favorites",
+  "filter.pinned": "Pinned",
 
   // Login
   "login.brand": "The Recipe Box",
@@ -119,21 +125,27 @@ const en: TranslationMap = {
 const id: TranslationMap = {
   "home.sharedTagline": "Dibagikan ke semua yang punya kodenya",
   "home.title": "Kotak Resep",
+  "home.subtitle": "Rumah untuk resep yang layak dibuat lagi.",
   "home.export": "Ekspor cadangan",
   "home.exporting": "Mengekspor…",
   "home.lock": "Kunci kotak",
-  "home.searchPlaceholder": "Cari resep…",
+  "home.searchPlaceholder": "Cari resep, bahan, atau tag…",
   "home.loading": "Membuka kotak…",
   "home.emptyTitle": "Kotakmu masih kosong.",
   "home.emptyDesc":
     "Tambahkan foto masakan dengan resepnya, atau sematkan dari YouTube untuk memulai.",
   "home.emptyCta": "Tambah resep pertama",
   "home.noMatch": "Tidak ada yang cocok.",
+  "home.newRecipe": "Resep Baru",
+  "home.sortLatest": "Terbaru",
+  "home.sortOldest": "Terlama",
+  "home.sortAZ": "A–Z",
 
   "filter.all": "Semua",
   "filter.tried": "Sudah",
   "filter.wishlist": "Ingin",
   "filter.favorites": "Favorit",
+  "filter.pinned": "Disematkan",
 
   "login.brand": "Kotak Resep",
   "login.heading": "Masukkan kode akses",
