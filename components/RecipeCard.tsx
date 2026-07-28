@@ -4,6 +4,12 @@ import Link from "next/link";
 import { Recipe } from "@/lib/types";
 import { useTranslation } from "@/lib/i18n";
 
+function categoryLabel(t: (key: string) => string, category: string): string {
+  const translated = t(`cat.${category}`);
+  const label = translated === `cat.${category}` ? category : translated;
+  return label.toUpperCase();
+}
+
 export function RecipeCard({
   recipe,
   index,
@@ -56,7 +62,7 @@ export function RecipeCard({
         </h3>
         <div className="mt-1 flex items-center gap-1.5">
           <p className="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
-            CAT.{t(`cat.${recipe.category}`).toUpperCase()}
+            CAT.{categoryLabel(t, recipe.category)}
           </p>
           {!recipe.tried && (
             <span className="rounded-full bg-paper-dark px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-ink-soft">
