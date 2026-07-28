@@ -78,6 +78,7 @@ async function ensureSchema(): Promise<void> {
       youtube_thumbnail TEXT,
       owner TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
   `;
   await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS tried BOOLEAN NOT NULL DEFAULT false`;
   await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS favorite BOOLEAN NOT NULL DEFAULT false`;

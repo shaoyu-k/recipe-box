@@ -5,9 +5,11 @@ import { listRecipes, insertRecipe, updateRecipeById } from "@/lib/sql";
 export async function GET(request: NextRequest) {
   try {
     // If logged in as a specific owner, filter by owner
-    // SY can see all
+    // SY can see all (including unowned existing recipes)
     const cookieOwner = request.cookies.get("recipebox_owner")?.value;
-    const recipes = await listRecipes(cookieOwner === "SY" ? undefined : cookieOwner);
+    const recipes = await listRecipes(
+      cookieOwner === "SY" || !cookieOwner ? undefined : cookieOwner
+    );
     return NextResponse.json(recipes);
   } catch (err) {
     console.error(err);
