@@ -33,6 +33,7 @@ interface Row {
   source_image: string | null;
   tried: boolean;
   favorite: boolean;
+  owner: string;
   created_at: string;
 }
 
@@ -51,6 +52,7 @@ function rowToRecipe(row: Row): Recipe {
     sourceImage: row.source_image,
     tried: row.tried,
     favorite: row.favorite,
+    owner: row.owner,
     createdAt: new Date(row.created_at).getTime(),
   };
 }
@@ -74,8 +76,8 @@ async function ensureSchema(): Promise<void> {
       youtube_url TEXT,
       youtube_video_id TEXT,
       youtube_thumbnail TEXT,
+      owner TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-    )
   `;
   await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS tried BOOLEAN NOT NULL DEFAULT false`;
   await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS favorite BOOLEAN NOT NULL DEFAULT false`;
@@ -84,6 +86,7 @@ async function ensureSchema(): Promise<void> {
   // no-op once every row has been migrated.
   await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS source_url TEXT`;
   await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS source_image TEXT`;
+  await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS owner TEXT NOT NULL DEFAULT ''`;
   await sql`
     UPDATE recipes SET source_url = youtube_url
     WHERE source_url IS NULL AND youtube_url IS NOT NULL
@@ -94,11 +97,11 @@ async function ensureSchema(): Promise<void> {
   `;
 }
 
-export async function listRecipes(): Promise<Recipe[]> {
+export async function listRecipes(owner?: string): Promise<Recipe[]> {
   await ensureSchema();
-  const rows = (await sql`
-    SELECT * FROM recipes ORDER BY created_at DESC
-  `) as unknown as Row[];
+  const rows = owner
+    ? (await sql`SELECT * FROM recipes WHERE owner = ${owner} ORDER BY created_at DESC`) as unknown as Row[]
+    : (await sql`SELECT * FROM recipes ORDER BY created_at DESC`) as unknown as Row[];
   return rows.map(rowToRecipe);
 }
 
@@ -112,6 +115,7 @@ export async function getRecipeById(id: string): Promise<Recipe | null> {
 
 export interface RecipeWriteInput {
   catalogNumber?: number;
+  owner?: string;
   title: string;
   category: Category;
   type: Recipe["type"];
@@ -131,12 +135,12 @@ export async function insertRecipe(input: RecipeWriteInput): Promise<Recipe> {
   const rows = (await sql`
     INSERT INTO recipes
       (id, catalog_number, title, category, type, ingredients, instructions, notes,
-       photo_url, source_url, source_image, tried, favorite)
+       photo_url, source_url, source_image, tried, favorite, owner)
     VALUES
       (${id}, ${input.catalogNumber ?? 0}, ${input.title}, ${input.category}, ${input.type},
        ${input.ingredients}, ${input.instructions}, ${input.notes},
        ${input.photoUrl}, ${input.sourceUrl}, ${input.sourceImage},
-       ${input.tried}, ${input.favorite})
+       ${input.tried}, ${input.favorite}, ${input.owner ?? ''})
     RETURNING *
   `) as unknown as Row[];
   return rowToRecipe(rows[0]);
@@ -150,6 +154,7 @@ export async function updateRecipeById(
   const rows = (await sql`
     UPDATE recipes SET
       catalog_number = ${input.catalogNumber ?? 0},
+      owner = ${input.owner ?? ''},
       title = ${input.title},
       category = ${input.category},
       type = ${input.type},

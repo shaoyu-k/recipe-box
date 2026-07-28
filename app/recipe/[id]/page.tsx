@@ -134,9 +134,6 @@ export default function RecipeDetailPage() {
 
         <div className="px-5 py-5 sm:px-7 sm:py-6">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-mono text-xs tracking-wider text-ink-soft">
-              {t("detail.catalogNo", { n: String(recipe.catalogNumber).padStart(3, "0") })}
-            </p>
             <span
               className="rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-card"
               style={{ background: CATEGORY_COLOR[recipe.category] }}

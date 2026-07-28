@@ -57,7 +57,7 @@ function ListIcon({ className }: { className?: string }) {
 type SortMode = "latest" | "oldest" | "az";
 
 export default function Home() {
-  const { t, locale, setLocale } = useTranslation();
+  const { t } = useTranslation();
   const [recipes, setRecipes] = useState<Recipe[] | null>(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<Category | "All">("All");
@@ -121,9 +121,6 @@ export default function Home() {
             <span className="font-display text-lg text-ink">{t("home.title")}</span>
           </div>
           <div className="flex items-center gap-4 font-mono text-[11px] uppercase tracking-wide text-ink-soft">
-            <button onClick={() => setLocale(locale === "en" ? "id" : "en")} className="hover:text-ink">
-              {t("lang.label")}
-            </button>
             {recipes !== null && recipes.length > 0 && (
               <button onClick={handleExport} disabled={exporting} className="hover:text-ink disabled:opacity-50">
                 {exporting ? t("home.exporting") : t("home.export")}

@@ -41,5 +41,6 @@ export interface Recipe {
   sourceImage: string | null;
   tried: boolean;
   favorite: boolean;
+  owner: string;
   createdAt: number;
 }

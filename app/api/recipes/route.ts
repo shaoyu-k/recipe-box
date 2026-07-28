@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { listRecipes, insertRecipe, updateRecipeById } from "@/lib/sql";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const recipes = await listRecipes();
+    // If logged in as a specific owner, filter by owner
+    // SY can see all
+    const cookieOwner = request.cookies.get("recipebox_owner")?.value;
+    const recipes = await listRecipes(cookieOwner === "SY" ? undefined : cookieOwner);
     return NextResponse.json(recipes);
   } catch (err) {
     console.error(err);
@@ -51,6 +54,7 @@ export async function POST(request: Request) {
 
     const recipe = await insertRecipe({
       catalogNumber: body.catalogNumber,
+      owner: request.cookies.get("recipebox_owner")?.value ?? "SY",
       title: body.title,
       category: body.category,
       type: body.type,

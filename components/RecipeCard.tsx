@@ -64,15 +64,17 @@ export function RecipeCard({
           <p className="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
             {categoryLabel(t, recipe.category)}
           </p>
+          {recipe.owner && (
+            <span className="rounded-full bg-paper-dark px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-ink-soft">
+              {recipe.owner}
+            </span>
+          )}
           {!recipe.tried && (
             <span className="rounded-full bg-paper-dark px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-ink-soft">
               {t("filter.wishlist")}
             </span>
           )}
         </div>
-        <p className="mt-1 font-mono text-[10px] tracking-wider text-ink-soft/70">
-          {t("detail.catalogNo", { n: String(recipe.catalogNumber).padStart(3, "0") })}
-        </p>
       </div>
     </Link>
   );
