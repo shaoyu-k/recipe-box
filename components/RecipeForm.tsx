@@ -6,13 +6,11 @@ import { CATEGORIES, CATEGORY_COLOR, Category, Recipe } from "@/lib/types";
 import { createRecipe, updateRecipe, uploadPhoto } from "@/lib/api-client";
 import { fetchLinkPreview } from "@/lib/link-preview";
 import { useObjectURL } from "@/lib/useObjectURL";
-import { useTranslation } from "@/lib/i18n";
 
 type Mode = "photo" | "pin";
 
 export function RecipeForm({ existing }: { existing?: Recipe }) {
   const router = useRouter();
-  const { t } = useTranslation();
   const isEditing = !!existing;
 
   const [mode, setMode] = useState<Mode>(
@@ -51,7 +49,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
       const preview = await fetchLinkPreview(linkUrl.trim());
       setFetchingPreview(false);
       if (!preview) {
-        setFetchError(t("form.linkError"));
+        setFetchError("Couldn't read that link. Check the URL and try again.");
         return;
       }
       setIsYouTube(preview.isYouTube);
@@ -70,32 +68,37 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
     if (file) setPhotoFile(file);
   }
 
+  function clearPhoto() {
+    setPhotoFile(null);
+    setPhotoUrl(null);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
     if (!title.trim()) {
-      setError(t("form.errorTitle"));
+      setError("Give the recipe a title.");
       return;
     }
     if (mode === "photo" && !photoFile && !photoUrl) {
-      setError(t("form.errorPhoto"));
+      setError("Add a photo of the dish, or switch to pinning a link.");
       return;
     }
     if (mode === "pin" && !linkUrl.trim()) {
-      setError(t("form.errorLink"));
+      setError("Paste a recipe link or YouTube URL.");
       return;
     }
 
     let finalPhotoUrl = photoUrl;
-    if (mode === "photo" && photoFile) {
+    if (photoFile) {
       setUploading(true);
       try {
         finalPhotoUrl = await uploadPhoto(photoFile);
         setPhotoUrl(finalPhotoUrl);
       } catch {
         setUploading(false);
-        setError(t("form.errorUpload"));
+        setError("Couldn't upload that photo. Check your connection and try again.");
         return;
       }
       setUploading(false);
@@ -110,7 +113,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
         ingredients,
         instructions,
         notes,
-        photoUrl: mode === "photo" ? finalPhotoUrl : null,
+        photoUrl: finalPhotoUrl ?? null,
         sourceUrl: mode === "pin" ? linkUrl.trim() : null,
         sourceImage: mode === "pin" ? sourceImage : null,
         tried,
@@ -121,7 +124,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
         : await createRecipe(input);
       router.push(`/recipe/${saved.id}`);
     } catch {
-      setError(t("form.errorSave"));
+      setError("Couldn't save that. Check your connection and try again.");
       setSaving(false);
     }
   }
@@ -133,15 +136,15 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
       {/* Mode toggle */}
       <div className="flex gap-2 rounded-full border border-line bg-card p-1">
         <ToggleButton active={mode === "photo"} onClick={() => setMode("photo")}>
-          {t("form.photoTab")}
+          Photo recipe
         </ToggleButton>
         <ToggleButton active={mode === "pin"} onClick={() => setMode("pin")}>
-          {t("form.pinTab")}
+          Pin from a link
         </ToggleButton>
       </div>
 
       {mode === "photo" ? (
-        <Field label={t("form.photoLabel")}>
+        <Field label="Photo of the dish">
           <label className="flex aspect-[4/3] w-full max-w-sm cursor-pointer items-center justify-center overflow-hidden rounded-sm border border-dashed border-line bg-paper-dark text-sm text-ink-soft hover:border-ink/40">
             {photoPreview ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -151,7 +154,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <span>{t("form.photoPlaceholder")}</span>
+              <span>Tap to choose a photo</span>
             )}
             <input
               type="file"
@@ -162,46 +165,78 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
           </label>
         </Field>
       ) : (
-        <Field label={t("form.linkLabel")}>
-          <input
-            type="url"
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            placeholder={t("form.linkPlaceholder")}
-            className="w-full rounded-sm border border-line bg-card px-3 py-2.5 text-sm text-ink placeholder:text-ink-soft/70"
-          />
-          {fetchingPreview && (
-            <p className="mt-2 font-mono text-xs text-ink-soft">
-              {t("form.fetching")}
-            </p>
-          )}
-          {fetchError && (
-            <p className="mt-2 text-xs text-tomato">{fetchError}</p>
-          )}
-          {sourceImage && (
-            <div className="mt-3 aspect-[4/3] w-full max-w-sm overflow-hidden rounded-sm bg-paper-dark">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={sourceImage}
-                alt="Link preview"
-                className="h-full w-full object-cover"
+        <>
+          <Field label="Link">
+            <input
+              type="url"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              placeholder="Paste a recipe link or YouTube URL"
+              className="w-full rounded-sm border border-line bg-card px-3 py-2.5 text-sm text-ink placeholder:text-ink-soft/70"
+            />
+            {fetchingPreview && (
+              <p className="mt-2 font-mono text-xs text-ink-soft">
+                Fetching title, photo, and recipe details…
+              </p>
+            )}
+            {fetchError && (
+              <p className="mt-2 text-xs text-tomato">{fetchError}</p>
+            )}
+            {sourceImage && !photoPreview && (
+              <div className="mt-3 aspect-[4/3] w-full max-w-sm overflow-hidden rounded-sm bg-paper-dark">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={sourceImage}
+                  alt="Link preview"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            )}
+          </Field>
+
+          <Field label="Your own photo (optional)">
+            <label className="flex aspect-[4/3] w-full max-w-sm cursor-pointer items-center justify-center overflow-hidden rounded-sm border border-dashed border-line bg-paper-dark text-sm text-ink-soft hover:border-ink/40">
+              {photoPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={photoPreview}
+                  alt="Your photo"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span>Add your own photo of the dish</span>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="hidden"
               />
-            </div>
-          )}
-        </Field>
+            </label>
+            {photoPreview && (
+              <button
+                type="button"
+                onClick={clearPhoto}
+                className="mt-1 text-xs text-ink-soft underline"
+              >
+                Remove photo
+              </button>
+            )}
+          </Field>
+        </>
       )}
 
-      <Field label={t("form.titleLabel")}>
+      <Field label="Title">
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder={t("form.titlePlaceholder")}
+          placeholder="Grandma's laksa"
           className="w-full rounded-sm border border-line bg-card px-3 py-2.5 text-sm text-ink placeholder:text-ink-soft/70"
         />
       </Field>
 
-      <Field label={t("form.categoryLabel")}>
+      <Field label="Category">
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
             <button
@@ -218,20 +253,20 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
                 className="h-2 w-2 rounded-full"
                 style={{ background: category === c ? "currentColor" : CATEGORY_COLOR[c] }}
               />
-              {t(`cat.${c}`)}
+              {c}
             </button>
           ))}
         </div>
       </Field>
 
-      <Field label={t("form.triedLabel")}>
+      <Field label="Have you made it?">
         <div className="flex items-center gap-3">
           <div className="flex gap-2 rounded-full border border-line bg-card p-1">
             <ToggleButton active={!tried} onClick={() => setTried(false)}>
-              {t("form.triedWishlist")}
+              On my wishlist
             </ToggleButton>
             <ToggleButton active={tried} onClick={() => setTried(true)}>
-              {t("form.triedYes")}
+              Tried it
             </ToggleButton>
           </div>
           <button
@@ -250,31 +285,31 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
         </div>
       </Field>
 
-      <Field label={t("form.ingredientsLabel")}>
+      <Field label="Ingredients">
         <textarea
           value={ingredients}
           onChange={(e) => setIngredients(e.target.value)}
-          placeholder={t("form.ingredientsPlaceholder")}
+          placeholder={"One per line, e.g.\n2 cups flour\n1 tsp salt"}
           rows={5}
           className="w-full resize-none rounded-sm border border-line bg-card px-3 py-2.5 font-mono text-sm leading-relaxed text-ink placeholder:text-ink-soft/70"
         />
       </Field>
 
-      <Field label={t("form.instructionsLabel")}>
+      <Field label="Instructions">
         <textarea
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}
-          placeholder={t("form.instructionsPlaceholder")}
+          placeholder={"One step per line"}
           rows={6}
           className="w-full resize-none rounded-sm border border-line bg-card px-3 py-2.5 text-sm leading-relaxed text-ink placeholder:text-ink-soft/70"
         />
       </Field>
 
-      <Field label={t("form.notesLabel")}>
+      <Field label="Notes (optional)">
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder={t("form.notesPlaceholder")}
+          placeholder="Substitutions, who loved it, what to change next time…"
           rows={3}
           className="w-full resize-none rounded-sm border border-line bg-card px-3 py-2.5 text-sm leading-relaxed text-ink placeholder:text-ink-soft/70"
         />
@@ -289,19 +324,19 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
           className="rounded-full bg-tomato px-6 py-2.5 text-sm font-medium text-card hover:bg-tomato-dark disabled:opacity-60"
         >
           {uploading
-            ? t("form.uploading")
+            ? "Uploading photo…"
             : saving
-              ? t("form.saving")
+              ? "Saving…"
               : isEditing
-                ? t("form.saveEdit")
-                : t("form.saveAdd")}
+                ? "Save changes"
+                : "Add to box"}
         </button>
         <button
           type="button"
           onClick={() => router.back()}
           className="rounded-full border border-line px-6 py-2.5 text-sm font-medium text-ink-soft hover:border-ink/40"
         >
-          {t("form.cancel")}
+          Cancel
         </button>
       </div>
     </form>
