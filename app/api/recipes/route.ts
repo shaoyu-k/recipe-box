@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { put } from "@vercel/blob";
 import { listRecipes, insertRecipe, updateRecipeById } from "@/lib/sql";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     // If logged in as a specific owner, filter by owner
     // SY can see all
@@ -34,7 +34,7 @@ async function mirrorImage(sourceImage: string, recipeId: string): Promise<strin
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     if (!body.title || !body.category || !body.type) {
