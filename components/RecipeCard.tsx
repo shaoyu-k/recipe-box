@@ -15,11 +15,13 @@ export function RecipeCard({
   index,
   layout = "grid",
   showOwner = false,
+  filteredTotal = 0,
 }: {
   recipe: Recipe;
   index: number;
   layout?: "grid" | "list";
   showOwner?: boolean;
+  filteredTotal?: number;
 }) {
   const { t } = useTranslation();
   const image = recipe.photoUrl || recipe.sourceImage;
@@ -76,9 +78,9 @@ export function RecipeCard({
               #{String(recipe.catalogNumber).padStart(3, "0")}
             </span>
           )}
-          {!showOwner && (
+          {!showOwner && filteredTotal > 0 && (
             <span className="font-mono text-[10px] tracking-wider text-ink-soft/70">
-              #{String(index + 1).padStart(2, "0")}
+              #{String(filteredTotal - index).padStart(2, "0")}
             </span>
           )}
           {!recipe.tried && (
