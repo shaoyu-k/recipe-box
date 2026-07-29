@@ -56,6 +56,8 @@ function ListIcon({ className }: { className?: string }) {
 
 type SortMode = "latest" | "oldest" | "az";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   const { t, locale, setLocale } = useTranslation();
   const [recipes, setRecipes] = useState<Recipe[] | null>(null);
