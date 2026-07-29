@@ -117,6 +117,9 @@ const en: TranslationMap = {
   "cat.Western": "Western",
   "cat.Indonesian": "Indonesian",
   "cat.Other": "Other",
+  "cat.Breakfast": "Breakfast",
+  "cat.Lunch": "Lunch",
+  "cat.Dinner": "Dinner",
 
   // Lang toggle
   "lang.label": "ID",
@@ -221,6 +224,9 @@ const id: TranslationMap = {
   "cat.Western": "Barat",
   "cat.Indonesian": "Indonesia",
   "cat.Other": "Lainnya",
+  "cat.Breakfast": "Sarapan",
+  "cat.Lunch": "Makan Siang",
+  "cat.Dinner": "Makan Malam",
 
   "lang.label": "EN",
 };
