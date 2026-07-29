@@ -70,7 +70,7 @@ export default function Home() {
 
   useEffect(() => {
     getAllRecipes().then(setRecipes).catch(() => setRecipes([]));
-    setOwner(localStorage.getItem("recipebox_owner"));
+    fetch("/api/me").then(r => r.json()).then(d => setOwner(d.owner)).catch(() => {});
   }, []);
 
   async function handleLock() {
@@ -264,7 +264,7 @@ export default function Home() {
         {filtered.length > 0 && view === "grid" && (
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {filtered.map((recipe, i) => (
-              <RecipeCard key={recipe.id} recipe={recipe} index={i} layout="grid" />
+              <RecipeCard key={recipe.id} recipe={recipe} index={i} layout="grid" showOwner={owner === "SY"} />
             ))}
           </div>
         )}
@@ -272,7 +272,7 @@ export default function Home() {
         {filtered.length > 0 && view === "list" && (
           <div className="mt-6 flex flex-col gap-3">
             {filtered.map((recipe, i) => (
-              <RecipeCard key={recipe.id} recipe={recipe} index={i} layout="list" />
+              <RecipeCard key={recipe.id} recipe={recipe} index={i} layout="list" showOwner={owner === "SY"} />
             ))}
           </div>
         )}
