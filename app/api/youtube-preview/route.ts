@@ -15,6 +15,52 @@ function extractYouTubeId(url: string): string | null {
   }
 }
 
+const API_KEY = "AIzaSyAJO8c71THmU3Pk-0hk9ub53moJCO4KURU";
+
+// Simple ingredient parsing from description text
+function parseIngredients(description: string): string | null {
+  const patterns = [
+    /(?:Ingredients|Bahan[-\s]?bahan|Bahan-bahan|INGREDIENTS)[:\s]*([\s\S]*?)(?:\n\n|\n(?:Instructions|Cara[-\s]?(?:membuat|memasak)|Directions|Method|Steps|How to|Preparation|To make|Instructions|DIRECTIONS))/i,
+    /(?:You will need|You need|What you need)[:\s]*([\s\S]*?)(?:\n\n|\n(?:Instructions|Method|Steps))/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = description.match(pattern);
+    if (match) {
+      const lines = match[1]
+        .split("\n")
+        .map((l: string) => l.trim())
+        .filter((l: string) => {
+          return l && l.length > 2 && !l.startsWith("Follow") && !l.startsWith("LIKE") && !l.startsWith("SUBSCRIBE") && !l.startsWith("#") && !l.startsWith("@") && !l.startsWith("http");
+        });
+      if (lines.length >= 2) return lines.join("\n");
+    }
+  }
+  return null;
+}
+
+function parseInstructions(description: string): string | null {
+  // Try to match after known instruction headers
+  const patterns = [
+    /(?:Instructions|Cara[-\s]?(?:membuat|memasak)|Directions|Method|Steps|How to|Preparation|To make|Instructions|DIRECTIONS)[:\s]*([\s\S]*?)(?:\n\n\n|\n*(?:Follow|LIKE|SUBSCRIBE|#|@|http)|$)/i,
+    /(?:Steps|Step by step)[:\s]*([\s\S]*?)(?:\n\n\n|\n*(?:Follow|Enjoy|LIKE|SUBSCRIBE|#|@|http)|$)/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = description.match(pattern);
+    if (match) {
+      const lines = match[1]
+        .split("\n")
+        .map((l: string) => l.trim())
+        .filter((l: string) => {
+          return l && l.length > 5 && !l.startsWith("Follow") && !l.startsWith("LIKE") && !l.startsWith("SUBSCRIBE") && !l.startsWith("#") && !l.startsWith("@") && !l.startsWith("http");
+        });
+      if (lines.length >= 2) return lines.join("\n");
+    }
+  }
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get("url");
   if (!url) {
@@ -27,123 +73,32 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const res = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-      signal: AbortSignal.timeout(8000),
-    });
-
-    if (!res.ok) {
-      return NextResponse.json({ error: "Could not fetch video" }, { status: 502 });
-    }
-
-    const html = await res.text();
-
-    // Try to extract description from JSON-LD
-    let description = "";
-    const jsonLdMatch = html.match(
-      /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/
+    // Use YouTube Data API v3
+    const apiRes = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${API_KEY}`,
+      { signal: AbortSignal.timeout(8000) }
     );
-    if (jsonLdMatch) {
-      try {
-        const jsonLd = JSON.parse(jsonLdMatch[1]);
-        if (Array.isArray(jsonLd)) {
-          for (const item of jsonLd) {
-            if (item.description) {
-              description = item.description;
-              break;
-            }
-          }
-        } else if (jsonLd.description) {
-          description = jsonLd.description;
-        }
-      } catch {}
+
+    if (!apiRes.ok) {
+      const err = await apiRes.text();
+      console.error("YouTube API error:", err);
+      return NextResponse.json({ error: "YouTube API error" }, { status: 502 });
     }
 
-    // Fallback: try ytInitialData JSON
-    if (!description) {
-      const ytDataMatch = html.match(/ytInitialData\s*=\s*({[\s\S]*?});/);
-      if (ytDataMatch) {
-        try {
-          const data = JSON.parse(ytDataMatch[1]);
-          const desc =
-            data?.contents?.twoColumnWatchNextResults?.results?.results?.contents?.[0]
-              ?.videoPrimaryInfoRenderer?.attributedDescription?.content;
-          if (desc) description = desc;
-        } catch {}
-      }
+    const data = await apiRes.json();
+    const item = data?.items?.[0];
+    if (!item) {
+      return NextResponse.json({ error: "Video not found" }, { status: 404 });
     }
 
-    // Fallback: meta description
-    if (!description) {
-      const metaMatch = html.match(
-        /<meta\s+name="description"\s+content="([^"]+)"/i
-      );
-      if (metaMatch) description = metaMatch[1];
-    }
+    const snippet = item.snippet;
+    const title = snippet.title || "Pinned recipe video";
+    const thumbnail = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+    const description: string = snippet.description || "";
 
-    // Fallback: og:description
-    if (!description) {
-      const ogMatch = html.match(
-        /<meta\s+property="og:description"\s+content="([^"]+)"/i
-      );
-      if (ogMatch) description = ogMatch[1];
-    }
-
-    // Clean up HTML entities
-    description = description.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\\n/g, "\n");
-
-    // Attemp to parse ingredients from description
-    let ingredients: string | null = null;
-    let instructions: string | null = null;
-
-    if (description) {
-      // Common ingredient markers
-      const ingMatch = description.match(
-        /(?:Ingredients|Bahan[-\s]?bahan|Bahan-bahan)[:\s]*([\s\S]*?)(?:\n\n|\n(?:Instructions|Cara[-\s]?(?:(?:membuat|memasak)|Cara[:\s])|Directions|Method|Steps|How to|Preparation|To make|Instructions))/i
-      );
-      if (ingMatch) {
-        const raw = ingMatch[1].trim();
-        // Filter out lines that look like ingredients (start with number/amount or bullet)
-        const lines = raw.split("\n").filter((l: string) => {
-          const t = l.trim();
-          return t && !t.startsWith("Follow") && !t.startsWith("LIKE") && !t.startsWith("SUBSCRIBE") && !t.startsWith("#") && t.length > 3;
-        });
-        if (lines.length >= 2) {
-          ingredients = lines.join("\n");
-        }
-      }
-
-      // Instructions
-      const instrMatch = description.match(
-        /(?:Instructions|Cara[-\s]?(?:membuat|memasak)|Directions|Method|Steps|How to|Preparation|To make|Instructions)[:\s]*([\s\S]*?)(?:\n\n\n|\n*$)/i
-      );
-      if (instrMatch) {
-        const raw = instrMatch[1].trim();
-        const lines = raw.split("\n").filter((l: string) => {
-          const t = l.trim();
-          return t && t.length > 5 && !t.startsWith("Follow") && !t.startsWith("LIKE") && !t.startsWith("SUBSCRIBE") && !t.startsWith("#");
-        });
-        if (lines.length >= 2) {
-          instructions = lines.join("\n");
-        }
-      }
-    }
-
-    // Get oembed title + thumbnail
-    let title = "Pinned recipe video";
-    let thumbnail = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-    try {
-      const oembed = await fetch(
-        `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
-      );
-      if (oembed.ok) {
-        const data = await oembed.json();
-        if (data.title) title = data.title;
-      }
-    } catch {}
+    // Parse ingredients & instructions from description
+    const ingredients = description ? parseIngredients(description) : null;
+    const instructions = description ? parseInstructions(description) : null;
 
     return NextResponse.json({
       videoId,
