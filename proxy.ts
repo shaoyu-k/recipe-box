@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/api/login"];
+const PUBLIC_PATHS = ["/login", "/api/login", "/api/login-direct"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -14,8 +14,9 @@ export function proxy(request: NextRequest) {
   // everyone out by accident.
   if (!code) return NextResponse.next();
 
-  const authed = request.cookies.get("recipebox_auth")?.value === code;
-  if (authed) return NextResponse.next();
+  const users = ["kitchen2026", "yuki2026", "jodie2026"];
+  const authed = request.cookies.get("recipebox_auth")?.value;
+  if (authed && users.includes(authed)) return NextResponse.next();
 
   if (pathname.startsWith("/api")) {
     return NextResponse.json({ error: "Not authorized." }, { status: 401 });
