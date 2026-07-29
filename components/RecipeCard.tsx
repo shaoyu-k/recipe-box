@@ -68,11 +68,6 @@ export function RecipeCard({
           <p className="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
             {categoryLabel(t, recipe.category)}
           </p>
-          {recipe.owner && (
-            <span className="rounded-full bg-paper-dark px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-ink-soft">
-              {recipe.owner}
-            </span>
-          )}
           {showOwner && recipe.catalogNumber > 0 && (
             <span className="font-mono text-[10px] tracking-wider text-ink-soft/70">
               #{String(recipe.catalogNumber).padStart(3, "0")}
