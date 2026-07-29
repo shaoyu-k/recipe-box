@@ -24,8 +24,6 @@ export function LoginForm() {
     });
 
     if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem("recipebox_owner", data.owner);
       router.push(params.get("next") || "/");
       router.refresh();
     } else {
