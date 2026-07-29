@@ -21,8 +21,8 @@ export async function fetchLinkPreview(url: string): Promise<LinkPreview | null>
       url: trimmed,
       title: yt.title,
       image: yt.thumbnail,
-      ingredients: null,
-      instructions: null,
+      ingredients: yt.ingredients,
+      instructions: yt.instructions,
       isYouTube: true,
     };
   }

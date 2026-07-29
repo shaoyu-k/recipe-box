@@ -19,6 +19,9 @@ export interface YouTubePreview {
   videoId: string;
   title: string;
   thumbnail: string;
+  description: string | null;
+  ingredients: string | null;
+  instructions: string | null;
 }
 
 // Tries YouTube's oEmbed endpoint for the real title. If that fails (network
@@ -30,20 +33,33 @@ export async function fetchYouTubePreview(url: string): Promise<YouTubePreview |
 
   const thumbnail = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
   let title = "Pinned recipe video";
+  let description: string | null = null;
+  let ingredients: string | null = null;
+  let instructions: string | null = null;
 
   try {
     const res = await fetch(
-      `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
+      `/api/youtube-preview?url=${encodeURIComponent(url)}`
     );
     if (res.ok) {
       const data = await res.json();
-      if (typeof data.title === "string" && data.title.trim()) {
-        title = data.title.trim();
-      }
+      if (data.title) title = data.title;
+      if (data.description) description = data.description;
+      if (data.ingredients) ingredients = data.ingredients;
+      if (data.instructions) instructions = data.instructions;
     }
   } catch {
-    // Network/CORS issue — keep the fallback title, thumbnail still works.
+    // Fallback: oembed for title only
+    try {
+      const oembed = await fetch(
+        `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
+      );
+      if (oembed.ok) {
+        const data = await oembed.json();
+        if (data.title) title = data.title;
+      }
+    } catch {}
   }
 
-  return { videoId, title, thumbnail };
+  return { videoId, title, thumbnail, description, ingredients, instructions };
 }

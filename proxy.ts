@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/api/login", "/api/login-direct"];
+const PUBLIC_PATHS = ["/login", "/api/login", "/api/login-direct", "/api/youtube-preview"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
