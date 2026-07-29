@@ -1,17 +1,20 @@
 "use client";
 
-import { CATEGORIES, Category } from "@/lib/types";
+import { getCategoriesForOwner, Category } from "@/lib/types";
 import { useTranslation } from "@/lib/i18n";
 
 export function CategoryFilter({
   active,
   onChange,
+  owner = null,
 }: {
   active: Category | "All";
   onChange: (c: Category | "All") => void;
+  owner?: string | null;
 }) {
   const { t } = useTranslation();
-  const items: (Category | "All")[] = ["All", ...CATEGORIES];
+  const categories = getCategoriesForOwner(owner);
+  const items: (Category | "All")[] = ["All", ...categories];
 
   return (
     <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">

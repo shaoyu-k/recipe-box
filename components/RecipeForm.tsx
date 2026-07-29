@@ -2,16 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CATEGORIES, CATEGORY_COLOR, Category, Recipe } from "@/lib/types";
+import { getCategoriesForOwner, CATEGORY_COLOR, Category, Recipe } from "@/lib/types";
 import { createRecipe, updateRecipe, uploadPhoto } from "@/lib/api-client";
 import { fetchLinkPreview } from "@/lib/link-preview";
 import { useObjectURL } from "@/lib/useObjectURL";
 
 type Mode = "photo" | "pin";
 
-export function RecipeForm({ existing }: { existing?: Recipe }) {
+export function RecipeForm({ existing, owner: propOwner }: { existing?: Recipe; owner?: string | null }) {
   const router = useRouter();
   const isEditing = !!existing;
+
+  const [owner, setOwner] = useState<string | null>(propOwner ?? null);
+
+  useEffect(() => {
+    if (propOwner) { setOwner(propOwner); return; }
+    fetch("/api/me").then(r => r.json()).then(d => setOwner(d.owner)).catch(() => {});
+  }, [propOwner]);
 
   const [mode, setMode] = useState<Mode>(
     existing && existing.type !== "photo" ? "pin" : "photo"
@@ -130,6 +137,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
   }
 
   const busy = uploading || saving;
+  const categories = getCategoriesForOwner(owner);
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -238,7 +246,7 @@ export function RecipeForm({ existing }: { existing?: Recipe }) {
 
       <Field label="Category">
         <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <button
               type="button"
               key={c}

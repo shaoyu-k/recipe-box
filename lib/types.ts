@@ -5,7 +5,10 @@ export type Category =
   | "Thai"
   | "Western"
   | "Indonesian"
-  | "Other";
+  | "Other"
+  | "Breakfast"
+  | "Lunch"
+  | "Dinner";
 
 export const CATEGORIES: Category[] = [
   "Chinese",
@@ -17,6 +20,12 @@ export const CATEGORIES: Category[] = [
   "Other",
 ];
 
+export const MEAL_CATEGORIES: Category[] = [
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+];
+
 export const CATEGORY_COLOR: Record<Category, string> = {
   Chinese: "var(--tomato)",
   Korean: "var(--plum)",
@@ -25,7 +34,15 @@ export const CATEGORY_COLOR: Record<Category, string> = {
   Western: "var(--mustard)",
   Indonesian: "var(--clay)",
   Other: "var(--sage)",
+  Breakfast: "var(--amber)",
+  Lunch: "var(--forest)",
+  Dinner: "var(--plum)",
 };
+
+export function getCategoriesForOwner(owner: string | null): Category[] {
+  if (owner === "Yuki") return MEAL_CATEGORIES;
+  return CATEGORIES;
+}
 
 export interface Recipe {
   id: string;

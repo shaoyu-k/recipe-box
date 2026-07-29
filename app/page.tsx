@@ -168,7 +168,7 @@ export default function Home() {
               />
             </div>
             <div className="mt-3">
-              <CategoryFilter active={category} onChange={setCategory} />
+              <CategoryFilter active={category} onChange={setCategory} owner={owner} />
             </div>
           </div>
         </div>
