@@ -40,24 +40,44 @@ function parseIngredients(description: string): string | null {
 }
 
 function parseInstructions(description: string): string | null {
-  // Try to match after known instruction headers
-  const patterns = [
-    /(?:Instructions|Cara[-\s]?(?:membuat|memasak)|Directions|Method|Steps|How to|Preparation|To make|Instructions|DIRECTIONS)[:\s]*([\s\S]*?)(?:\n\n\n|\n*(?:Follow|LIKE|SUBSCRIBE|#|@|http)|$)/i,
-    /(?:Steps|Step by step)[:\s]*([\s\S]*?)(?:\n\n\n|\n*(?:Follow|Enjoy|LIKE|SUBSCRIBE|#|@|http)|$)/i,
-  ];
+  // Try to find numbered steps AFTER the ingredients section
+  const sections = description.split(/\n\n+/);
+  let inIngredients = false;
+  let foundInstructions: string[] = [];
 
-  for (const pattern of patterns) {
-    const match = description.match(pattern);
-    if (match) {
-      const lines = match[1]
+  for (const section of sections) {
+    const trimmed = section.trim();
+    if (/ingredients|bahan/i.test(trimmed)) {
+      inIngredients = true;
+      continue;
+    }
+    if (inIngredients && /\d+\.\s/.test(trimmed)) {
+      // This looks like numbered steps after ingredients
+      foundInstructions = trimmed
         .split("\n")
         .map((l: string) => l.trim())
-        .filter((l: string) => {
-          return l && l.length > 5 && !l.startsWith("Follow") && !l.startsWith("LIKE") && !l.startsWith("SUBSCRIBE") && !l.startsWith("#") && !l.startsWith("@") && !l.startsWith("http");
-        });
-      if (lines.length >= 2) return lines.join("\n");
+        .filter((l: string) => /\d+\.\s/.test(l) || (l.length > 5 && !l.startsWith("#") && !l.startsWith("@") && !l.startsWith("http")));
+      break;
     }
   }
+
+  if (foundInstructions.length >= 2) {
+    return foundInstructions.join("\n");
+  }
+
+  // Fallback: look for instruction headers after ingredients
+  const ingEnd = description.match(/To serve:|Ingredients:[\s\S]*?\n\n/);
+  if (ingEnd) {
+    const afterIngredients = description.slice((ingEnd.index || 0) + ingEnd[0].length);
+    const lines = afterIngredients
+      .split("\n")
+      .map((l: string) => l.trim())
+      .filter((l: string) => {
+        return l && l.length > 5 && !l.startsWith("#") && !l.startsWith("@") && !l.startsWith("http") && !l.startsWith("Follow") && !l.startsWith("Enjoy") && !l.startsWith("Reminder") && !l.startsWith("You got this");
+      });
+    if (lines.length >= 2) return lines.join("\n");
+  }
+
   return null;
 }
 
