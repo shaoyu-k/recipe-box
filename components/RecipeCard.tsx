@@ -76,6 +76,11 @@ export function RecipeCard({
               #{String(recipe.catalogNumber).padStart(3, "0")}
             </span>
           )}
+          {!showOwner && (
+            <span className="font-mono text-[10px] tracking-wider text-ink-soft/70">
+              #{String(index + 1).padStart(2, "0")}
+            </span>
+          )}
           {!recipe.tried && (
             <span className="rounded-full bg-paper-dark px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-ink-soft">
               {t("filter.wishlist")}
