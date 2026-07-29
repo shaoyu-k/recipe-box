@@ -4,12 +4,10 @@ import { listRecipes, insertRecipe, getNextCatalogNumber, updateRecipeById } fro
 
 export async function GET(request: NextRequest) {
   try {
-    // If logged in as a specific owner, filter by owner
-    // SY can see all (including unowned existing recipes)
+    // Each user only sees their own recipes
+    // If no owner cookie set (fresh session), return empty
     const cookieOwner = request.cookies.get("recipebox_owner")?.value;
-    const recipes = await listRecipes(
-      cookieOwner === "SY" || !cookieOwner ? undefined : cookieOwner
-    );
+    const recipes = cookieOwner ? await listRecipes(cookieOwner) : [];
     return NextResponse.json(recipes);
   } catch (err) {
     console.error(err);

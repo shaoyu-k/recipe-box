@@ -88,6 +88,7 @@ async function ensureSchema(): Promise<void> {
   await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS source_url TEXT`;
   await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS source_image TEXT`;
   await sql`ALTER TABLE recipes ADD COLUMN IF NOT EXISTS owner TEXT NOT NULL DEFAULT ''`;
+  await sql`UPDATE recipes SET owner = 'SY' WHERE owner = '' OR owner IS NULL`;
   await sql`
     UPDATE recipes SET source_url = youtube_url
     WHERE source_url IS NULL AND youtube_url IS NOT NULL
