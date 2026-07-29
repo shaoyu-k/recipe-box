@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { put } from "@vercel/blob";
-import { listRecipes, insertRecipe, updateRecipeById } from "@/lib/sql";
+import { listRecipes, insertRecipe, getNextCatalogNumber, updateRecipeById } from "@/lib/sql";
 
 export async function GET(request: NextRequest) {
   try {
@@ -54,8 +54,9 @@ export async function POST(request: NextRequest) {
       photoUrl = await mirrorImage(body.sourceImage, crypto.randomUUID());
     }
 
+    const nextCn = body.catalogNumber ?? (await getNextCatalogNumber());
     const recipe = await insertRecipe({
-      catalogNumber: body.catalogNumber,
+      catalogNumber: nextCn,
       owner: request.cookies.get("recipebox_owner")?.value ?? "SY",
       title: body.title,
       category: body.category,

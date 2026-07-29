@@ -106,6 +106,11 @@ export async function listRecipes(owner?: string): Promise<Recipe[]> {
   return rows.map(rowToRecipe);
 }
 
+export async function getNextCatalogNumber(): Promise<number> {
+  const rows = (await sql`SELECT MAX(catalog_number) as max_cn FROM recipes`) as any[];
+  return (rows[0]?.max_cn ?? 0) + 1;
+}
+
 export async function getRecipeById(id: string): Promise<Recipe | null> {
   await ensureSchema();
   const rows = (await sql`
