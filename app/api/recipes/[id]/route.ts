@@ -46,6 +46,8 @@ export async function PUT(
     }
 
     const recipe = await updateRecipeById(id, {
+      catalogNumber: body.catalogNumber ?? 0,
+      owner: body.owner,
       title: body.title,
       category: body.category,
       type: body.type,
