@@ -17,16 +17,22 @@ export function LoginForm() {
     setSubmitting(true);
     setError(null);
 
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
-    });
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
 
-    if (res.ok) {
-      router.push(params.get("next") || "/");
-      router.refresh();
-    } else {
+      if (res.ok) {
+        router.push(params?.get("next") || "/");
+        router.refresh();
+      } else {
+        setError(t("login.error"));
+        setSubmitting(false);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
       setError(t("login.error"));
       setSubmitting(false);
     }
